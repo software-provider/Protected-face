@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jul 31 01:04:44 2020
-
-@author: hp
-"""
 
 import cv2
 from face_detector import get_face_detector, find_faces
