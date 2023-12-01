@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  1 22:45:22 2020
-
-@author: hp
-"""
-
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -25,13 +18,7 @@ from tensorflow.keras.regularizers import l2
 import wget
 
 def load_darknet_weights(model, weights_file):
-    '''
-    Helper function used to load darknet weights.
-    
-    :param model: Object of the Yolo v3 model
-    :param weights_file: Path to the file with Yolo V3 weights
-    '''
-    
+      
     #Open the weights file
     wf = open(weights_file, 'rb')
     major, minor, revision, seen, _ = np.fromfile(wf, dtype=np.int32, count=5)
@@ -90,13 +77,7 @@ def load_darknet_weights(model, weights_file):
     wf.close()
     
 def draw_outputs(img, outputs, class_names):
-    '''
-    Helper, util, function that draws predictons on the image.
-    
-    :param img: Loaded image
-    :param outputs: YoloV3 predictions
-    :param class_names: list of all class names found in the dataset
-    '''
+  
     boxes, objectness, classes, nums = outputs
     boxes, objectness, classes, nums = boxes[0], objectness[0], classes[0], nums[0]
     wh = np.flip(img.shape[0:2])
@@ -116,15 +97,7 @@ yolo_anchors = np.array([(10, 13), (16, 30), (33, 23), (30, 61), (62, 45),
 yolo_anchor_masks = np.array([[6, 7, 8], [3, 4, 5], [0, 1, 2]])
     
 def DarknetConv(x, filters, kernel_size, strides=1, batch_norm=True):
-    '''
-    Call this function to define a single Darknet convolutional layer
     
-    :param x: inputs
-    :param filters: number of filters in the convolutional layer
-    :param kernel_size: Size of kernel in the Conv layer
-    :param strides: Conv layer strides
-    :param batch_norm: Whether or not to use the custom batch norm layer.
-    '''
     #Image padding
     if strides == 1:
         padding = 'same'
@@ -143,12 +116,7 @@ def DarknetConv(x, filters, kernel_size, strides=1, batch_norm=True):
     return x
 
 def DarknetResidual(x, filters):
-    '''
-    Call this function to define a single DarkNet Residual layer
-    
-    :param x: inputs
-    :param filters: number of filters in each Conv layer.
-    '''
+ 
     prev = x
     x = DarknetConv(x, filters // 2, 1)
     x = DarknetConv(x, filters, 3)
@@ -157,22 +125,14 @@ def DarknetResidual(x, filters):
   
   
 def DarknetBlock(x, filters, blocks):
-    '''
-    Call this function to define a single DarkNet Block (made of multiple Residual layers)
-    
-    :param x: inputs
-    :param filters: number of filters in each Residual layer
-    :param blocks: number of Residual layers in the block
-    '''
+  
     x = DarknetConv(x, filters, 3, strides=2)
     for _ in range(blocks):
         x = DarknetResidual(x, filters)
     return x
 
 def Darknet(name=None):
-    '''
-    The main function that creates the whole DarkNet.
-    '''
+   
     x = inputs = Input([None, None, 3])
     x = DarknetConv(x, 32, 3)
     x = DarknetBlock(x, 64, 1)
@@ -183,12 +143,7 @@ def Darknet(name=None):
     return tf.keras.Model(inputs, (x_36, x_61, x), name=name)
 
 def YoloConv(filters, name=None):
-    '''
-    Call this function to define the Yolo Conv layer.
-    
-    :param flters: number of filters for the conv layer
-    :param name: name of the layer
-    '''
+ 
     def yolo_conv(x_in):
         if isinstance(x_in, tuple):
             inputs = Input(x_in[0].shape[1:]), Input(x_in[1].shape[1:])
@@ -210,14 +165,7 @@ def YoloConv(filters, name=None):
     return yolo_conv
 
 def YoloOutput(filters, anchors, classes, name=None):
-    '''
-    This function defines outputs for the Yolo V3. (Creates output projections)
-     
-    :param filters: number of filters for the conv layer
-    :param anchors: anchors
-    :param classes: list of classes in a dataset
-    :param name: name of the layer
-    '''
+   
     def yolo_output(x_in):
         x = inputs = Input(x_in.shape[1:])
         x = DarknetConv(x, filters * 2, 3)
@@ -228,14 +176,7 @@ def YoloOutput(filters, anchors, classes, name=None):
     return yolo_output
 
 def yolo_boxes(pred, anchors, classes):
-    '''
-    Call this function to get bounding boxes from network predictions
-    
-    :param pred: Yolo predictions
-    :param anchors: anchors
-    :param classes: List of classes from the dataset
-    '''
-    
+      
     # pred: (batch_size, grid, grid, anchors, (x, y, w, h, obj, ...classes))
     grid_size = tf.shape(pred)[1]
     #Extract box coortinates from prediction vectors
