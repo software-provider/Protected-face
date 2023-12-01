@@ -1,4 +1,4 @@
-# Proctoring-AI
+# Protected Face
 
 Project to create an automated proctoring system where the user can be monitored automatically through the webcam and microphone.
 
